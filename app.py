@@ -7,8 +7,11 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
 
 # Create uploads folder if it doesn't exist
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
+try:
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'])
+except OSError:
+    pass
 
 # Expanded skills list for better analysis
 SKILLS_DB = {
@@ -65,16 +68,16 @@ def analyze_resume(text):
 def index():
     if request.method == "POST":
         if 'resume' not in request.files:
-            return render_template("index.html", error="No file uploaded")
+            return render_template("index.html", error="No file uploaded", skills=None, score=None)
         
         file = request.files["resume"]
         if file.filename == '':
-            return render_template("index.html", error="No selected file")
+            return render_template("index.html", error="No selected file", skills=None, score=None)
         
         if file and file.filename.endswith('.pdf'):
             text = extract_text(file)
             if not text:
-                return render_template("index.html", error="Could not extract text from PDF")
+                return render_template("index.html", error="Could not extract text from PDF", skills=None, score=None)
                 
             skills_by_category, score, recommendations = analyze_resume(text)
             return render_template("index.html", 
@@ -83,7 +86,7 @@ def index():
                                  recommendations=recommendations,
                                  filename=file.filename)
         else:
-            return render_template("index.html", error="Please upload a PDF file")
+            return render_template("index.html", error="Please upload a PDF file", skills=None, score=None)
             
     return render_template("index.html", skills=None, score=None)
 
