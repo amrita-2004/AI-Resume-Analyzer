@@ -3,60 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Resume Analyzer | Optimize Your Career</title>
-    <meta name="description" content="Get instant feedback on your resume with our AI-powered analyzer. Discover hidden skills and improve your score.">
+    <title>AI Career Intelligence Platform | Resume & ATS Analyzer</title>
+    <meta name="description" content="Company-ready AI Career Intelligence Platform: ATS Scoring, Skill Gap Analysis, Job Description Matching, AI Bullet Rewriter & Interview Prep.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <header>
-        <h1 class="logo" id="main-title">RESUME ANALYZER AI</h1>
-        <p class="subtitle">Extract insights and optimize your profile effortlessly</p>
+        <h1 class="logo" id="main-title">
+            <i class="fas fa-brain"></i> CAREER INTELLIGENCE AI
+        </h1>
+        <p class="subtitle">Next-Generation Resume Optimization, ATS Dashboard & Career Insights Platform</p>
     </header>
 
     <main class="container">
         {% if error %}
             <div class="error-msg">
-                <i class="fas fa-exclamation-circle"></i> {{ error }}
+                <i class="fas fa-exclamation-triangle"></i> {{ error }}
             </div>
         {% endif %}
 
+        <!-- Upload & Job Description Form -->
         <section class="upload-section">
-            <form action="/" method="POST" enctype="multipart/form-data" id="upload-form">
-                <div class="file-input-container" id="drop-zone">
-                    <input type="file" name="resume" id="resume-upload" accept=".pdf" required>
-                    <div class="upload-icon">
-                        <i class="fas fa-file-pdf"></i>
+            <form action="/" method="POST" enctype="multipart/form-data" id="upload-form" style="width: 100%;">
+                <div class="form-grid">
+                    <div class="file-input-container" id="drop-zone">
+                        <input type="file" name="resume" id="resume-upload" accept=".pdf" required>
+                        <div class="upload-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <p class="upload-text" id="file-name-display">Click or Drag & Drop Resume (PDF only)</p>
                     </div>
-                    <p class="upload-text" id="file-name-display">Click or Drag & Drop Resume (PDF only)</p>
+                    
+                    <div class="jd-textarea-container">
+                        <textarea name="job_description" class="jd-textarea" placeholder="[Optional] Paste Target Job Description here for instant Match Score & Skill Gap Analysis..."></textarea>
+                    </div>
                 </div>
-                <div style="text-align: center; margin-top: 2rem;">
+
+                <div style="text-align: center; margin-top: 1.8rem;">
                     <button type="submit" class="btn-analyze" id="analyze-button">
-                        <i class="fas fa-magic"></i> ANALYZE RESUME
+                        <i class="fas fa-bolt"></i> RUN AI CAREER ANALYSIS
                     </button>
                 </div>
             </form>
         </section>
 
-        {% if score is not none %}
-            <section class="results-section" id="results">
-                <div class="score-card">
-                    <div>
-                        <h2 class="score-label">Resume Optimization Score</h2>
-                        <p class="subtitle">Based on detected industry keywords</p>
+        {% if analysis %}
+            <!-- Navigation Sub-Tabs -->
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-tab="ats">
+                    <i class="fas fa-chart-pie"></i> ATS Dashboard & Heatmap
+                </button>
+                <button class="nav-tab" data-tab="jd">
+                    <i class="fas fa-bullseye"></i> Job Match & Skill Gap
+                </button>
+                <button class="nav-tab" data-tab="rewriter">
+                    <i class="fas fa-magic"></i> AI Bullet Rewriter
+                </button>
+                <button class="nav-tab" data-tab="interview">
+                    <i class="fas fa-comments"></i> Interview Prep
+                </button>
+                <button class="nav-tab" data-tab="career">
+                    <i class="fas fa-rocket"></i> Career Recommendations
+                </button>
+                <button class="nav-tab" data-tab="history">
+                    <i class="fas fa-history"></i> Version Comparison & History
+                </button>
+            </nav>
+
+            <!-- TAB 1: ATS SCORE DASHBOARD & HEATMAP -->
+            <section class="tab-panel active" id="tab-ats">
+                <div class="dashboard-grid">
+                    <div class="score-card-main">
+                        <h2 style="font-size: 1.4rem;">ATS Optimization Score</h2>
+                        <p class="text-muted" style="font-size: 0.9rem;">Composite parseability & keyword match</p>
+                        
+                        <div class="radial-score-gauge" style="--score: {{ analysis.comprehensive.ats_score }};">
+                            <div class="radial-score-inner">
+                                {{ analysis.comprehensive.ats_score }}%
+                            </div>
+                        </div>
+                        <p style="font-size: 0.95rem; font-weight: 600; color: var(--accent);">
+                            {% if analysis.comprehensive.ats_score >= 80 %}
+                                🔥 Excellent ATS Readiness
+                            {% elif analysis.comprehensive.ats_score >= 60 %}
+                                ⚡ Good (Moderate Optimization)
+                            {% else %}
+                                ⚠️ Needs Critical Keyword Optimization
+                            {% endif %}
+                        </p>
                     </div>
-                    <div class="score-circle">
-                        {{ score }}%
+
+                    <div>
+                        <div class="subscores-grid">
+                            <div class="subscore-box">
+                                <div class="subscore-title">Keywords & Skills</div>
+                                <div class="subscore-value">{{ analysis.comprehensive.score_breakdown.keywords }}%</div>
+                                <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: {{ analysis.comprehensive.score_breakdown.keywords }}%;"></div></div>
+                            </div>
+                            <div class="subscore-box">
+                                <div class="subscore-title">Formatting & Structure</div>
+                                <div class="subscore-value">{{ analysis.comprehensive.score_breakdown.formatting }}%</div>
+                                <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: {{ analysis.comprehensive.score_breakdown.formatting }}%;"></div></div>
+                            </div>
+                            <div class="subscore-box">
+                                <div class="subscore-title">High-Impact Action Verbs</div>
+                                <div class="subscore-value">{{ analysis.comprehensive.score_breakdown.action_verbs }}%</div>
+                                <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: {{ analysis.comprehensive.score_breakdown.action_verbs }}%;"></div></div>
+                            </div>
+                            <div class="subscore-box">
+                                <div class="subscore-title">Quantifiable Metrics</div>
+                                <div class="subscore-value">{{ analysis.comprehensive.score_breakdown.impact_metrics }}%</div>
+                                <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: {{ analysis.comprehensive.score_breakdown.impact_metrics }}%;"></div></div>
+                            </div>
+                        </div>
+
+                        <!-- Radar Chart -->
+                        <div style="background: var(--glass-card); padding: 1.2rem; border-radius: 18px; border: 1px solid var(--glass-border); max-height: 260px; display: flex; justify-content: center;">
+                            <canvas id="atsRadarChart"></canvas>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Strategic Recommendations -->
+                {% if analysis.comprehensive.recommendations %}
+                    <div style="margin-top: 2rem; background: rgba(0, 210, 255, 0.06); padding: 1.5rem; border-radius: 18px; border: 1px solid rgba(0, 210, 255, 0.25);">
+                        <h3 style="color: #ffd700; margin-bottom: 0.8rem;"><i class="fas fa-lightbulb"></i> Actionable ATS Fixes</h3>
+                        <ul style="list-style: none;">
+                            {% for rec in analysis.comprehensive.recommendations %}
+                                <li style="padding: 0.4rem 0;"><i class="fas fa-chevron-right" style="color: var(--accent); margin-right: 8px;"></i> {{ rec }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+                <!-- Skill Categories -->
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;"><i class="fas fa-tags"></i> Extracted Tech Stack & Skills</h3>
                 <div class="skills-grid">
-                    {% for category, items in skills.items() %}
+                    {% for category, items in analysis.comprehensive.skills.items() %}
                         <div class="skill-category">
-                            <h3 class="category-title">{{ category }}</h3>
+                            <h4 class="category-title">{{ category }}</h4>
                             <div class="tags">
                                 {% for item in items %}
                                     <span class="skill-tag">{{ item }}</span>
@@ -66,54 +156,205 @@
                     {% endfor %}
                 </div>
 
-                {% if recommendations %}
-                    <div class="recommendations">
-                        <h3 class="rec-title"><i class="fas fa-lightbulb"></i> Strategic Recommendations</h3>
-                        <ul class="rec-list">
-                            {% for rec in recommendations %}
-                                <li class="rec-item">{{ rec }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
-                
-                <div style="text-align: center; margin-top: 1rem;">
-                    <button onclick="window.print()" class="btn-analyze" style="background: var(--glass); border: 1px solid var(--glass-border);">
-                        <i class="fas fa-download"></i> Save Report
-                    </button>
+                <!-- Resume Heatmap -->
+                <h3 style="margin-top: 2.5rem; margin-bottom: 1rem;"><i class="fas fa-fire"></i> Resume Visual Heatmap & Section Impact</h3>
+                <div class="heatmap-grid">
+                    {% for sec in analysis.comprehensive.heatmap.sections %}
+                        <div class="heatmap-card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+                                <strong>{{ sec.section }}</strong>
+                                <span class="status-badge {% if sec.score >= 75 %}status-high{% elif sec.score >= 50 %}status-mod{% else %}status-low{% endif %}">
+                                    {{ sec.status }}
+                                </span>
+                            </div>
+                            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: {{ sec.score }}%;"></div></div>
+                        </div>
+                    {% endfor %}
                 </div>
             </section>
+
+            <!-- TAB 2: JOB MATCH & SKILL GAP -->
+            <section class="tab-panel" id="tab-jd">
+                {% if analysis.jd_match %}
+                    <div class="match-summary-card">
+                        <div>
+                            <h2>Target Job Match Analysis</h2>
+                            <p class="text-muted">TF-IDF Vector Similarity & Skill Overlap</p>
+                        </div>
+                        <div style="font-size: 2.5rem; font-weight: 800; color: var(--accent-green);">
+                            {{ analysis.jd_match.match_percentage }}%
+                        </div>
+                    </div>
+
+                    <div class="gap-columns">
+                        <div class="gap-box">
+                            <h3 style="color: var(--success); margin-bottom: 1rem;"><i class="fas fa-check-circle"></i> Matched Keywords ({{ analysis.jd_match.matched_keywords|length }})</h3>
+                            <div class="tags">
+                                {% for kw in analysis.jd_match.matched_keywords %}
+                                    <span class="skill-tag" style="border-color: rgba(0, 230, 118, 0.4);">{{ kw }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="gap-box">
+                            <h3 style="color: var(--danger); margin-bottom: 1rem;"><i class="fas fa-exclamation-circle"></i> Missing Required Keywords ({{ analysis.jd_match.missing_keywords|length }})</h3>
+                            <div class="tags">
+                                {% for kw in analysis.jd_match.missing_keywords %}
+                                    <span class="skill-tag" style="border-color: rgba(255, 82, 82, 0.4); color: #ff8a8a;">{{ kw }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if analysis.jd_match.roadmap %}
+                        <h3 style="margin-top: 2rem; margin-bottom: 1rem;"><i class="fas fa-road"></i> AI Learning & Skill Bridge Roadmap</h3>
+                        <div class="gap-box">
+                            {% for item in analysis.jd_match.roadmap %}
+                                <div style="padding: 0.8rem 0; border-bottom: 1px solid var(--glass-border);">
+                                    <strong style="color: var(--accent);">{{ item.skill }}</strong> - <span style="color: var(--warning);">{{ item.priority }}</span> ({{ item.estimated_time }})
+                                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.2rem;">{{ item.action }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div style="text-align: center; padding: 3rem; background: var(--glass-card); border-radius: 18px; border: 1px solid var(--glass-border);">
+                        <i class="fas fa-bullseye" style="font-size: 3rem; color: var(--accent); margin-bottom: 1rem;"></i>
+                        <h3>No Job Description Provided</h3>
+                        <p class="text-muted" style="margin-top: 0.5rem;">Paste a job description in the upload area above and click "Run AI Career Analysis" to see your match score and skill gap breakdown!</p>
+                    </div>
+                {% endif %}
+            </section>
+
+            <!-- TAB 3: AI BULLET REWRITER -->
+            <section class="tab-panel" id="tab-rewriter">
+                <div class="rewrite-section">
+                    <h3><i class="fas fa-magic"></i> Interactive STAR Bullet Point Optimizer</h3>
+                    <p class="text-muted" style="margin-bottom: 1.5rem;">Transform weak bullet points into high-impact, ATS-optimized, metric-driven statements.</p>
+
+                    <div class="rewrite-input-group">
+                        <input type="text" id="input-bullet-rewrite" class="rewrite-input" placeholder="e.g., Worked on python backend code and handled postgresql database queries">
+                        <button type="button" id="btn-do-rewrite" class="btn-analyze" style="padding: 0.8rem 1.8rem;">
+                            <i class="fas fa-magic"></i> Rewrite Bullet
+                        </button>
+                    </div>
+
+                    <div id="rewrite-result-box" style="display: none;"></div>
+
+                    {% if analysis.sample_rewrites %}
+                        <h4 style="margin-top: 2.5rem; margin-bottom: 1rem;"><i class="fas fa-list-check"></i> Sample Extracted Bullet Transformations from Resume</h4>
+                        {% for rw in analysis.sample_rewrites %}
+                            <div class="rewrite-card">
+                                <div class="rewrite-comparison">
+                                    <div class="rewrite-box original">
+                                        <span class="badge badge-passive">Original</span>
+                                        <p>{{ rw.original }}</p>
+                                    </div>
+                                    <div style="text-align: center;"><i class="fas fa-arrow-right" style="color: var(--accent);"></i></div>
+                                    <div class="rewrite-box optimized">
+                                        <span class="badge badge-active">AI STAR Rewritten</span>
+                                        <p id="sample-rw-{{ loop.index }}">{{ rw.rewritten }}</p>
+                                        <button class="btn-copy" onclick="copyToClipboard('sample-rw-{{ loop.index }}')"><i class="fas fa-copy"></i> Copy</button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- TAB 4: INTERVIEW QUESTION GENERATOR -->
+            <section class="tab-panel" id="tab-interview">
+                <h3 style="margin-bottom: 1.5rem;"><i class="fas fa-comments"></i> Tailored Technical & Behavioral Interview Questions</h3>
+                
+                <h4 style="color: var(--accent); margin-bottom: 1rem;"><i class="fas fa-code"></i> Technical Questions (Tailored to detected skills)</h4>
+                {% for q in analysis.interview_prep.technical_questions %}
+                    <div class="interview-card">
+                        <div class="question-title">Q: {{ q.question }}</div>
+                        <span class="badge" style="background: rgba(138, 43, 226, 0.3); color: white;">{{ q.category }}</span>
+                        <div class="answer-keypoints">
+                            <strong>Key Points to Touch in Answer:</strong>
+                            <ul style="margin-top: 0.4rem; padding-left: 1.2rem;">
+                                {% for kp in q.key_points %}
+                                    <li style="font-size: 0.9rem; color: var(--text-muted);">{{ kp }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <h4 style="color: var(--accent-green); margin-top: 2rem; margin-bottom: 1rem;"><i class="fas fa-users"></i> Behavioral STAR Questions</h4>
+                {% for q in analysis.interview_prep.behavioral_questions %}
+                    <div class="interview-card">
+                        <div class="question-title">Q: {{ q.question }}</div>
+                        <span class="badge" style="background: rgba(0, 210, 255, 0.3); color: white;">Framework: {{ q.framework }}</span>
+                        <div class="answer-keypoints">
+                            <strong>Framework Elements:</strong>
+                            <ul style="margin-top: 0.4rem; padding-left: 1.2rem;">
+                                {% for kp in q.key_points %}
+                                    <li style="font-size: 0.9rem; color: var(--text-muted);">{{ kp }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endfor %}
+            </section>
+
+            <!-- TAB 5: CAREER RECOMMENDATIONS -->
+            <section class="tab-panel" id="tab-career">
+                <h3 style="margin-bottom: 1.5rem;"><i class="fas fa-compass"></i> AI Career Path & Role Matching</h3>
+                {% for car in analysis.comprehensive.career_recommendations %}
+                    <div class="career-card">
+                        <div>
+                            <h3 style="color: var(--accent);">{{ car.role }}</h3>
+                            <p class="text-muted" style="margin-top: 0.3rem;">Career Growth Trajectory: {{ car.growth_path|join(' ➔ ') }}</p>
+                            {% if car.missing_key_skills %}
+                                <p style="font-size: 0.85rem; color: var(--warning); margin-top: 0.5rem;">Missing Key Skills for Next Level: {{ car.missing_key_skills|join(', ') }}</p>
+                            {% endif %}
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--accent-green);">{{ car.match_percentage }}%</div>
+                            <span class="text-muted" style="font-size: 0.85rem;">Profile Match</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </section>
+
+            <!-- TAB 6: VERSION COMPARISON & HISTORY -->
+            <section class="tab-panel" id="tab-history">
+                <h3><i class="fas fa-code-branch"></i> Resume Version Comparison Tool</h3>
+                <p class="text-muted" style="margin-bottom: 1.5rem;">Compare ATS scores, skill counts, and improvements between different resume versions.</p>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                    <select id="compare-select-a" class="rewrite-input" style="flex: 1;"></select>
+                    <select id="compare-select-b" class="rewrite-input" style="flex: 1;"></select>
+                    <button id="btn-run-compare" class="btn-analyze" style="padding: 0.8rem 1.8rem;"><i class="fas fa-columns"></i> Compare</button>
+                </div>
+
+                <div id="compare-results-output" style="display: none;"></div>
+
+                <h3 style="margin-top: 3rem; margin-bottom: 1rem;"><i class="fas fa-chart-line"></i> Score Progress History Trend</h3>
+                <div style="background: var(--glass-card); padding: 1.5rem; border-radius: 18px; border: 1px solid var(--glass-border); margin-bottom: 2rem;">
+                    <canvas id="scoreHistoryChart" style="max-height: 240px;"></canvas>
+                </div>
+
+                <h3 style="margin-bottom: 1rem;"><i class="fas fa-list"></i> Past Analysis Logs</h3>
+                <div id="history-list-container"></div>
+            </section>
+
+            <div style="text-align: center; margin-top: 3rem;">
+                <button onclick="window.print()" class="btn-analyze" style="background: var(--glass); border: 1px solid var(--glass-border);">
+                    <i class="fas fa-print"></i> Export / Print Intelligence Report
+                </button>
+            </div>
         {% endif %}
     </main>
 
+    {% if analysis %}
     <script>
-        const fileInput = document.getElementById('resume-upload');
-        const fileNameDisplay = document.getElementById('file-name-display');
-        const dropZone = document.getElementById('drop-zone');
-
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                fileNameDisplay.textContent = e.target.files[0].name;
-                fileNameDisplay.style.color = 'var(--accent)';
-            }
-        });
-
-        // Basic drag and drop visual feedback
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                dropZone.style.borderColor = 'var(--accent)';
-                dropZone.style.background = 'rgba(255, 255, 255, 0.1)';
-            }, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                dropZone.style.borderColor = 'var(--glass-border)';
-                dropZone.style.background = 'transparent';
-            }, false);
-        });
+        window.ANALYSIS_DATA = {{ analysis|tojson }};
     </script>
+    {% endif %}
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
