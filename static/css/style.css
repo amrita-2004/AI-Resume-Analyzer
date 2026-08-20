@@ -584,3 +584,308 @@ header {
 .text-muted { color: var(--text-muted); }
 .text-success { color: var(--success); }
 .text-danger { color: var(--danger); }
+
+/* ==========================================================================
+   AI Job Readiness & Rejection Recovery Engine Styles
+   ========================================================================== */
+
+/* Action Banner */
+.action-banner {
+    border-radius: 18px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+}
+.action-danger {
+    background: linear-gradient(135deg, rgba(255, 82, 82, 0.15), rgba(138, 43, 226, 0.1));
+    border-color: rgba(255, 82, 82, 0.4);
+}
+.action-warning {
+    background: linear-gradient(135deg, rgba(255, 183, 77, 0.15), rgba(138, 43, 226, 0.1));
+    border-color: rgba(255, 183, 77, 0.4);
+}
+.action-success {
+    background: linear-gradient(135deg, rgba(0, 230, 118, 0.15), rgba(0, 210, 255, 0.1));
+    border-color: rgba(0, 230, 118, 0.4);
+}
+
+.banner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.banner-status {
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+.banner-tier-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+.banner-message {
+    font-size: 1.05rem;
+    margin-bottom: 0.8rem;
+    line-height: 1.5;
+}
+.banner-disclaimer {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Status Tier Badges */
+.tier-ready { background: rgba(0, 230, 118, 0.25); color: var(--success); border: 1px solid var(--success); }
+.tier-almost { background: rgba(255, 215, 0, 0.25); color: #ffd700; border: 1px solid #ffd700; }
+.tier-improvement { background: rgba(255, 183, 77, 0.25); color: var(--warning); border: 1px solid var(--warning); }
+.tier-notready { background: rgba(255, 82, 82, 0.25); color: var(--danger); border: 1px solid var(--danger); }
+
+/* Rejection Reasons Grid */
+.rejection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1rem;
+}
+
+.rejection-card {
+    background: var(--glass-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    transition: transform 0.2s;
+}
+.rejection-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 82, 82, 0.4);
+}
+
+.rejection-header {
+    margin-bottom: 0.8rem;
+}
+.rejection-vector {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ff8a8a;
+}
+.rejection-body p {
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+.rejection-why {
+    color: var(--text-muted);
+    font-size: 0.9rem !important;
+}
+.rejection-fix {
+    background: rgba(0, 210, 255, 0.08);
+    border-left: 3px solid var(--accent);
+    padding: 0.8rem 1rem;
+    border-radius: 0 10px 10px 0;
+    margin-top: 0.8rem;
+    font-size: 0.92rem;
+}
+
+/* Priority Skill Gap Analysis */
+.priority-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1rem;
+}
+.priority-box {
+    background: var(--glass-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+.prio-high { border-top: 4px solid var(--danger); }
+.prio-med { border-top: 4px solid var(--warning); }
+.prio-low { border-top: 4px solid var(--success); }
+
+.prio-high h4 { color: var(--danger); }
+.prio-med h4 { color: var(--warning); }
+.prio-low h4 { color: var(--success); }
+
+.prio-badge-high { border-color: rgba(255, 82, 82, 0.5) !important; color: #ff8a8a !important; }
+.prio-badge-med { border-color: rgba(255, 183, 77, 0.5) !important; color: #ffb74d !important; }
+.prio-badge-low { border-color: rgba(0, 230, 118, 0.5) !important; color: var(--accent-green) !important; }
+
+/* Personalized Action Plan Roadmap */
+.roadmap-container {
+    background: var(--glass-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+.roadmap-nav {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+.roadmap-tab {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.roadmap-tab:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.08);
+}
+.roadmap-tab.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--accent);
+}
+.roadmap-panel {
+    display: none;
+}
+.roadmap-panel.active {
+    display: block;
+}
+.roadmap-panel h4 {
+    font-size: 1.2rem;
+    color: var(--accent);
+    margin-bottom: 1.2rem;
+}
+.plan-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+.plan-item {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 1rem;
+    font-size: 0.95rem;
+}
+.plan-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+}
+
+/* Targeted Project Recommendation Card */
+.project-rec-card {
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(0, 210, 255, 0.1));
+    border: 1px solid rgba(0, 210, 255, 0.3);
+    border-radius: 20px;
+    padding: 1.8rem;
+    margin-top: 1rem;
+}
+.project-details-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.2rem;
+}
+.project-detail-box {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 1rem;
+}
+.project-detail-box strong {
+    font-size: 0.9rem;
+    color: var(--accent);
+
+}
+
+/* Re-Application Readiness Tracker */
+.tracker-card {
+    background: var(--glass-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 1.8rem;
+    margin-top: 1rem;
+}
+.tracker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.tracker-score-display {
+    text-align: right;
+}
+.tracker-score-display h2 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--accent-green);
+}
+.tracker-tasks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+.tracker-task-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.tracker-task-item:hover {
+    border-color: var(--accent);
+    background: rgba(0, 210, 255, 0.05);
+}
+.task-checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+.task-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+.task-phase-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--accent);
+}
+.task-title-text {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+.task-weight-text {
+    font-weight: 700;
+    color: var(--accent-green);
+    font-size: 0.9rem;
+}
+
+/* Resume Re-Analysis Card */
+.reanalyze-card {
+    background: var(--glass-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 1.8rem;
+    margin-top: 1rem;
+}
+

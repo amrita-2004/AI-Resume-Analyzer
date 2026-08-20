@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initBulletRewriter();
     initHistoryAndComparison();
     initCharts();
+    initRecoveryEngine();
 });
 
 // Tab Navigation
@@ -373,3 +374,165 @@ function escapeHtml(text) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+
+// AI Job Readiness & Rejection Recovery Engine Frontend Interactivity
+function initRecoveryEngine() {
+    initRoadmapTabs();
+    initReadinessTracker();
+    initReanalysisForm();
+}
+
+// Roadmap 7/30/60/90-Day Tab Switcher
+function initRoadmapTabs() {
+    const tabs = document.querySelectorAll('.roadmap-tab');
+    const panels = document.querySelectorAll('.roadmap-panel');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const planDays = tab.getAttribute('data-plan');
+            tabs.forEach(t => t.classList.remove('active'));
+            panels.forEach(p => p.classList.remove('active'));
+
+            tab.classList.add('active');
+            const targetPanel = document.getElementById(`plan-panel-${planDays}`);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
+            }
+        });
+    });
+}
+
+// Re-Application Readiness Progress Tracker Checkbox Engine
+function initReadinessTracker() {
+    const checkboxes = document.querySelectorAll('.task-checkbox');
+    const trackerVal = document.getElementById('tracker-readiness-val');
+    const trackerProgress = document.getElementById('tracker-progress-bar');
+    const gaugeVal = document.getElementById('readiness-gauge-val');
+
+    if (!checkboxes.length || !trackerVal) return;
+
+    const initialScore = parseInt(trackerVal.innerText) || 50;
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            let addedPoints = 0;
+            checkboxes.forEach(c => {
+                if (c.checked) {
+                    addedPoints += (parseInt(c.getAttribute('data-weight')) || 15);
+                }
+            });
+
+            // Scale score dynamically up to 98 max
+            let updatedScore = Math.min(initialScore + Math.round((addedPoints / 100) * (98 - initialScore)), 98);
+            
+            trackerVal.innerText = `${updatedScore}%`;
+            if (gaugeVal) gaugeVal.innerText = `${updatedScore}%`;
+            if (trackerProgress) trackerProgress.style.width = `${updatedScore}%`;
+        });
+    });
+}
+
+// Resume Re-Analysis Form Submission Handler
+function initReanalysisForm() {
+    const form = document.getElementById('reanalyze-form');
+    const btn = document.getElementById('btn-reanalyze');
+    const fileInput = document.getElementById('reanalyze-file');
+    const outputBox = document.getElementById('reanalyze-output-box');
+
+    if (!form || !btn || !outputBox) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!fileInput.files.length) {
+            alert('Please select an improved resume file to re-analyze.');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Comparing Resumes...';
+
+        const formData = new FormData();
+        formData.append('resume', fileInput.files[0]);
+        if (window.ANALYSIS_DATA) {
+            formData.append('previous_analysis', JSON.stringify(window.ANALYSIS_DATA));
+        }
+
+        try {
+            const res = await fetch('/api/reanalyze', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await res.json();
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-rotate"></i> Re-Analyze My Resume';
+
+            if (data.status === 'success' && data.comparison) {
+                renderReanalysisResult(data.comparison, outputBox);
+            } else {
+                alert(data.error || 'Failed to re-analyze resume.');
+            }
+        } catch (err) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-rotate"></i> Re-Analyze My Resume';
+            alert('Error connecting to server for re-analysis.');
+        }
+    });
+}
+
+function renderReanalysisResult(comp, container) {
+    const diffSign = comp.improvement_pct >= 0 ? '+' : '';
+    const diffClass = comp.improvement_pct >= 0 ? 'text-success' : 'text-danger';
+
+    let gainedSkillsHtml = comp.gained_skills.length > 0 
+        ? comp.gained_skills.map(s => `<span class="skill-tag prio-badge-low">${escapeHtml(s)}</span>`).join(' ') 
+        : '<span class="text-muted">None detected</span>';
+
+    let resolvedGapsHtml = comp.resolved_gaps.length > 0
+        ? comp.resolved_gaps.map(s => `<span class="skill-tag prio-badge-med">${escapeHtml(s)}</span>`).join(' ')
+        : '<span class="text-muted">None resolved</span>';
+
+    container.innerHTML = `
+        <div style="background: rgba(0, 210, 255, 0.05); border: 1px solid var(--accent); border-radius: 18px; padding: 1.5rem;">
+            <h3 style="color: var(--accent); margin-bottom: 1rem;"><i class="fas fa-square-poll-vertical"></i> Resume Re-Analysis Delta Report</h3>
+            
+            <div class="comparison-grid" style="margin-top: 1rem;">
+                <div class="comp-column">
+                    <h3>Previous Analysis</h3>
+                    <div class="comp-metric-card" style="text-align: center; margin: 1rem 0;">
+                        <span class="comp-metric-val" style="font-size: 2.2rem; font-weight: 800;">${comp.previous_score}%</span>
+                        <span class="comp-metric-lbl" style="display: block; color: var(--text-muted);">Baseline Readiness</span>
+                    </div>
+                </div>
+
+                <div class="comp-divider">
+                    <div class="comp-delta-badge ${diffClass}">
+                        <span>Improvement</span>
+                        <h2 style="font-size: 2.2rem; font-weight: 800;">${diffSign}${comp.improvement_pct}%</h2>
+                    </div>
+                </div>
+
+                <div class="comp-column">
+                    <h3>Current Analysis</h3>
+                    <div class="comp-metric-card" style="text-align: center; margin: 1rem 0;">
+                        <span class="comp-metric-val" style="font-size: 2.2rem; font-weight: 800; color: var(--accent-green);">${comp.current_score}%</span>
+                        <span class="comp-metric-lbl" style="display: block; color: var(--text-muted);">Updated Readiness Tier: ${escapeHtml(comp.new_readiness_status)}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 12px;">
+                    <strong style="color: var(--success);"><i class="fas fa-plus-circle"></i> Skills Gained (${comp.gained_skills.length}):</strong>
+                    <div class="tags" style="margin-top: 0.5rem;">${gainedSkillsHtml}</div>
+                </div>
+                <div style="background: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: 12px;">
+                    <strong style="color: var(--accent);"><i class="fas fa-check-double"></i> Skill Gaps Resolved (${comp.resolved_gaps.length}):</strong>
+                    <div class="tags" style="margin-top: 0.5rem;">${resolvedGapsHtml}</div>
+                </div>
+            </div>
+        </div>
+    `;
+    container.style.display = 'block';
+}
+

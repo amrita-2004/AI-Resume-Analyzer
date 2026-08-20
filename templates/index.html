@@ -32,21 +32,22 @@
             <form action="/" method="POST" enctype="multipart/form-data" id="upload-form" style="width: 100%;">
                 <div class="form-grid">
                     <div class="file-input-container" id="drop-zone">
-                        <input type="file" name="resume" id="resume-upload" accept=".pdf" required>
+                        <input type="file" name="resume" id="resume-upload" accept=".pdf,.docx" required>
                         <div class="upload-icon">
-                            <i class="fas fa-file-pdf"></i>
+                            <i class="fas fa-file-arrow-up"></i>
                         </div>
-                        <p class="upload-text" id="file-name-display">Click or Drag & Drop Resume (PDF only)</p>
+                        <p class="upload-text" id="file-name-display">Click or Drag & Drop Resume (PDF or DOCX)</p>
                     </div>
                     
                     <div class="jd-textarea-container">
-                        <textarea name="job_description" class="jd-textarea" placeholder="[Optional] Paste Target Job Description here for instant Match Score & Skill Gap Analysis..."></textarea>
+                        <input type="text" name="target_role" class="rewrite-input" placeholder="[Optional] Target Job Role (e.g. Full Stack Developer, Data Scientist, DevOps Engineer)" style="margin-bottom: 0.8rem;">
+                        <textarea name="job_description" class="jd-textarea" placeholder="[Optional] Paste Target Job Description here for AI Job Readiness & Skill Gap Analysis..."></textarea>
                     </div>
                 </div>
 
                 <div style="text-align: center; margin-top: 1.8rem;">
                     <button type="submit" class="btn-analyze" id="analyze-button">
-                        <i class="fas fa-bolt"></i> RUN AI CAREER ANALYSIS
+                        <i class="fas fa-rocket"></i> RUN AI RECOVERY & READINESS ANALYSIS
                     </button>
                 </div>
             </form>
@@ -55,7 +56,10 @@
         {% if analysis %}
             <!-- Navigation Sub-Tabs -->
             <nav class="nav-tabs">
-                <button class="nav-tab active" data-tab="ats">
+                <button class="nav-tab active" data-tab="recovery">
+                    <i class="fas fa-shield-heart"></i> Job Readiness & Recovery Engine
+                </button>
+                <button class="nav-tab" data-tab="ats">
                     <i class="fas fa-chart-pie"></i> ATS Dashboard & Heatmap
                 </button>
                 <button class="nav-tab" data-tab="jd">
@@ -68,15 +72,289 @@
                     <i class="fas fa-comments"></i> Interview Prep
                 </button>
                 <button class="nav-tab" data-tab="career">
-                    <i class="fas fa-rocket"></i> Career Recommendations
+                    <i class="fas fa-compass"></i> Career Recommendations
                 </button>
                 <button class="nav-tab" data-tab="history">
                     <i class="fas fa-history"></i> Version Comparison & History
                 </button>
             </nav>
 
+            <!-- TAB 0: AI JOB READINESS & REJECTION RECOVERY ENGINE -->
+            <section class="tab-panel active" id="tab-recovery">
+                {% if analysis.recovery %}
+                    <!-- Action Recommendation Banner -->
+                    <div class="action-banner action-{{ analysis.recovery.action_rec.action_type }}">
+                        <div class="banner-header">
+                            <span class="banner-status">{{ analysis.recovery.action_rec.status_text }}</span>
+                            <span class="banner-tier-name">{{ analysis.recovery.action_rec.tier_name }} Tier (Readiness: {{ analysis.recovery.readiness_score }}%)</span>
+                        </div>
+                        <p class="banner-message">{{ analysis.recovery.action_rec.message }}</p>
+                        <p class="banner-disclaimer"><i class="fas fa-info-circle"></i> {{ analysis.recovery.disclaimer }}</p>
+                    </div>
+
+                    <!-- 7-Dimensional Score Grid -->
+                    <div class="dashboard-grid" style="margin-top: 2rem;">
+                        <div class="score-card-main">
+                            <h2 style="font-size: 1.3rem;">Estimated Job Readiness Score</h2>
+                            <p class="text-muted" style="font-size: 0.85rem;">Composite candidate readiness index</p>
+                            
+                            <div class="radial-score-gauge" style="--score: {{ analysis.recovery.readiness_score }};">
+                                <div class="radial-score-inner" id="readiness-gauge-val">
+                                    {{ analysis.recovery.readiness_score }}%
+                                </div>
+                            </div>
+                            <span class="status-badge {{ analysis.recovery.status_tier.badge_class }}">
+                                {{ analysis.recovery.status_tier.icon }} {{ analysis.recovery.status_tier.tier }} ({{ analysis.recovery.status_tier.range }})
+                            </span>
+                            <p class="text-muted" style="font-size: 0.85rem; margin-top: 0.8rem; text-align: center;">
+                                {{ analysis.recovery.status_tier.summary }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <h3 style="margin-bottom: 1rem;"><i class="fas fa-sliders"></i> 7-Dimensional Candidate Analysis</h3>
+                            <div class="subscores-grid">
+                                <div class="subscore-box">
+                                    <div class="subscore-title">ATS Score</div>
+                                    <div class="subscore-value">{{ analysis.recovery.scores.ats_score }}%</div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: {{ analysis.recovery.scores.ats_score }}%;"></div></div>
+                                </div>
+                                <div class="subscore-box">
+                                    <div class="subscore-title">Overall Job Match</div>
+                                    <div class="subscore-value">{{ analysis.recovery.scores.overall_match }}%</div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: {{ analysis.recovery.scores.overall_match }}%;"></div></div>
+                                </div>
+                                <div class="subscore-box">
+                                    <div class="subscore-title">Skills Match</div>
+                                    <div class="subscore-value">{{ analysis.recovery.scores.skills_match }}%</div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: {{ analysis.recovery.scores.skills_match }}%;"></div></div>
+                                </div>
+                                <div class="subscore-box">
+                                    <div class="subscore-title">Experience Match</div>
+                                    <div class="subscore-value">{{ analysis.recovery.scores.experience_match }}%</div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: {{ analysis.recovery.scores.experience_match }}%;"></div></div>
+                                </div>
+                                <div class="subscore-box">
+                                    <div class="subscore-title">Project Relevance</div>
+                                    <div class="subscore-value">{{ analysis.recovery.scores.project_relevance }}%</div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: {{ analysis.recovery.scores.project_relevance }}%;"></div></div>
+                                </div>
+                                <div class="subscore-box">
+                                    <div class="subscore-title">Keyword Match</div>
+                                    <div class="subscore-value">{{ analysis.recovery.scores.keyword_match }}%</div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: {{ analysis.recovery.scores.keyword_match }}%;"></div></div>
+                                </div>
+                                <div class="subscore-box">
+                                    <div class="subscore-title">Education Match</div>
+                                    <div class="subscore-value">{{ analysis.recovery.scores.education_match }}%</div>
+                                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: {{ analysis.recovery.scores.education_match }}%;"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Why You May Not Be Shortlisted -->
+                    <h3 style="margin-top: 2.5rem; margin-bottom: 1rem;"><i class="fas fa-triangle-exclamation" style="color: var(--warning);"></i> Why You May Not Be Shortlisted</h3>
+                    <div class="rejection-grid">
+                        {% for reason in analysis.recovery.rejection_reasons %}
+                            <div class="rejection-card">
+                                <div class="rejection-header">
+                                    <span class="rejection-vector"><i class="fas fa-circle-xmark" style="color: var(--danger); margin-right: 6px;"></i> {{ reason.vector }}</span>
+                                </div>
+                                <div class="rejection-body">
+                                    <p><strong>Problem:</strong> {{ reason.problem }}</p>
+                                    <p class="rejection-why"><strong>Why it matters:</strong> {{ reason.why_it_matters }}</p>
+                                    <div class="rejection-fix">
+                                        <strong><i class="fas fa-wrench"></i> How to improve:</strong> {{ reason.how_to_improve }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Prioritized Skill Gap Analysis -->
+                    <h3 style="margin-top: 2.5rem; margin-bottom: 1rem;"><i class="fas fa-layer-group"></i> Prioritized Skill Gap Analysis</h3>
+                    <div class="priority-grid">
+                        <div class="priority-box prio-high">
+                            <h4><i class="fas fa-fire"></i> HIGH PRIORITY SKILLS</h4>
+                            <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 0.6rem;">Must-have core technologies required by job description</p>
+                            <div class="tags">
+                                {% if analysis.recovery.skill_gaps.high_priority %}
+                                    {% for s in analysis.recovery.skill_gaps.high_priority %}
+                                        <span class="skill-tag prio-badge-high">{{ s }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">No high priority gaps detected!</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="priority-box prio-med">
+                            <h4><i class="fas fa-bolt"></i> MEDIUM PRIORITY SKILLS</h4>
+                            <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 0.6rem;">Important frameworks, databases & libraries</p>
+                            <div class="tags">
+                                {% if analysis.recovery.skill_gaps.medium_priority %}
+                                    {% for s in analysis.recovery.skill_gaps.medium_priority %}
+                                        <span class="skill-tag prio-badge-med">{{ s }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">No medium priority gaps detected!</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="priority-box prio-low">
+                            <h4><i class="fas fa-check"></i> LOW PRIORITY SKILLS</h4>
+                            <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 0.6rem;">Secondary tools & methodologies</p>
+                            <div class="tags">
+                                {% if analysis.recovery.skill_gaps.low_priority %}
+                                    {% for s in analysis.recovery.skill_gaps.low_priority %}
+                                        <span class="skill-tag prio-badge-low">{{ s }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">No secondary gaps detected!</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Personalized Recovery Action Roadmap (7/30/60/90 Days) -->
+                    <h3 style="margin-top: 2.5rem; margin-bottom: 1rem;"><i class="fas fa-map-location-dot"></i> Personalized Action Plan Roadmap</h3>
+                    <div class="roadmap-container">
+                        <div class="roadmap-nav">
+                            <button class="roadmap-tab active" data-plan="7"><i class="fas fa-stopwatch"></i> 7-Day Plan</button>
+                            <button class="roadmap-tab" data-plan="30"><i class="fas fa-calendar-day"></i> 30-Day Plan</button>
+                            <button class="roadmap-tab" data-plan="60"><i class="fas fa-calendar-week"></i> 60-Day Plan</button>
+                            <button class="roadmap-tab" data-plan="90"><i class="fas fa-calendar-check"></i> 90-Day Plan</button>
+                        </div>
+
+                        {% for days, plan_item in [('7', analysis.recovery.recovery_plan.plan_7_day), ('30', analysis.recovery.recovery_plan.plan_30_day), ('60', analysis.recovery.recovery_plan.plan_60_day), ('90', analysis.recovery.recovery_plan.plan_90_day)] %}
+                            <div class="roadmap-panel {% if days == '7' %}active{% endif %}" id="plan-panel-{{ days }}">
+                                <h4>{{ plan_item.title }}</h4>
+                                <div class="plan-details-grid">
+                                    <div class="plan-item"><span class="plan-label"><i class="fas fa-graduation-cap"></i> Skill to Learn:</span> {{ plan_item.skill_to_learn }}</div>
+                                    <div class="plan-item"><span class="plan-label"><i class="fas fa-book-open"></i> Topic to Study:</span> {{ plan_item.topic_to_study }}</div>
+                                    <div class="plan-item"><span class="plan-label"><i class="fas fa-code"></i> Practical Task:</span> {{ plan_item.practical_task }}</div>
+                                    <div class="plan-item"><span class="plan-label"><i class="fas fa-diagram-project"></i> Recommended Project:</span> {{ plan_item.recommended_project }}</div>
+                                    <div class="plan-item"><span class="plan-label"><i class="fas fa-file-pen"></i> Resume Improvement:</span> {{ plan_item.resume_improvement_task }}</div>
+                                    <div class="plan-item"><span class="plan-label"><i class="fas fa-comments"></i> Interview Prep Task:</span> {{ plan_item.interview_prep_task }}</div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Targeted Project Recommendation -->
+                    <h3 style="margin-top: 2.5rem; margin-bottom: 1rem;"><i class="fas fa-laptop-code"></i> Targeted Project Recommendation</h3>
+                    <div class="project-rec-card">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                            <div>
+                                <h3 style="color: var(--accent);">{{ analysis.recovery.project_rec.title }}</h3>
+                                <p class="text-muted" style="margin-top: 0.4rem;">{{ analysis.recovery.project_rec.description }}</p>
+                            </div>
+                            <span class="badge badge-active" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">
+                                Recommended Architecture: {{ analysis.recovery.project_rec.architecture_stack }}
+                            </span>
+                        </div>
+
+                        <div class="project-details-row" style="margin-top: 1.2rem;">
+                            <div class="project-detail-box">
+                                <strong>Why this project is useful:</strong>
+                                <p>{{ analysis.recovery.project_rec.why_useful }}</p>
+                            </div>
+                            <div class="project-detail-box">
+                                <strong>Skills demonstrated:</strong>
+                                <div class="tags" style="margin-top: 0.4rem;">
+                                    {% for sk in analysis.recovery.project_rec.missing_skills_demonstrated %}
+                                        <span class="skill-tag" style="border-color: var(--accent);">{{ sk }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="project-detail-box">
+                                <strong>Target Resume Section:</strong>
+                                <p>{{ analysis.recovery.project_rec.resume_section_to_improve }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resume Improvement Suggestions -->
+                    <h3 style="margin-top: 2.5rem; margin-bottom: 1rem;"><i class="fas fa-wand-magic-sparkles"></i> Resume Statement Improvements</h3>
+                    <p class="text-muted" style="margin-bottom: 1rem;">Original bullets vs. STAR-enhanced improvements without fabricated experience.</p>
+                    {% for imp in analysis.recovery.resume_improvements %}
+                        <div class="rewrite-card">
+                            <div class="rewrite-comparison">
+                                <div class="rewrite-box original">
+                                    <span class="badge badge-passive">Current Bullet</span>
+                                    <p>{{ imp.current }}</p>
+                                </div>
+                                <div style="text-align: center;"><i class="fas fa-arrow-right" style="color: var(--accent);"></i></div>
+                                <div class="rewrite-box optimized">
+                                    <span class="badge badge-active">Suggested Improvement</span>
+                                    <p id="rec-imp-{{ loop.index }}">{{ imp.improved }}</p>
+                                    <button class="btn-copy" onclick="copyToClipboard('rec-imp-{{ loop.index }}')"><i class="fas fa-copy"></i> Copy</button>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                    <!-- Re-Application Readiness Tracker -->
+                    <h3 style="margin-top: 2.5rem; margin-bottom: 1rem;"><i class="fas fa-bars-progress"></i> Re-Application Readiness Progress Tracker</h3>
+                    <div class="tracker-card">
+                        <div class="tracker-header">
+                            <div>
+                                <h4>Interactive Progress Checklist</h4>
+                                <p class="text-muted" style="font-size: 0.85rem;">Check off tasks as you complete them to see your updated estimated readiness score.</p>
+                            </div>
+                            <div class="tracker-score-display">
+                                <span class="text-muted" style="font-size: 0.85rem;">Updated Readiness:</span>
+                                <h2 id="tracker-readiness-val">{{ analysis.recovery.readiness_score }}%</h2>
+                            </div>
+                        </div>
+
+                        <div class="progress-bar-bg" style="height: 10px; margin-bottom: 1.5rem;">
+                            <div class="progress-bar-fill" id="tracker-progress-bar" style="width: {{ analysis.recovery.readiness_score }}%;"></div>
+                        </div>
+
+                        <div class="tracker-tasks-list">
+                            {% for task in analysis.recovery.tracker_tasks %}
+                                <label class="tracker-task-item" for="{{ task.id }}">
+                                    <input type="checkbox" class="task-checkbox" id="{{ task.id }}" data-weight="{{ task.weight }}">
+                                    <div class="task-info">
+                                        <span class="task-phase-badge">{{ task.phase }}</span>
+                                        <span class="task-title-text">{{ task.title }}</span>
+                                    </div>
+                                    <span class="task-weight-text">+{{ task.weight }}%</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Resume Re-Analysis & Comparison Section -->
+                    <h3 style="margin-top: 2.5rem; margin-bottom: 1rem;"><i class="fas fa-arrows-rotate"></i> Resume Re-Analysis & Side-by-Side Comparison</h3>
+                    <div class="reanalyze-card">
+                        <div class="reanalyze-intro">
+                            <div>
+                                <h4>Upload Improved Resume</h4>
+                                <p class="text-muted">Once you've added new skills, projects, or bullet fixes, re-analyze your resume to view score improvement.</p>
+                            </div>
+                        </div>
+
+                        <form id="reanalyze-form" enctype="multipart/form-data" style="margin-top: 1rem;">
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                                <input type="file" name="resume" id="reanalyze-file" class="rewrite-input" accept=".pdf,.docx" required style="flex: 1;">
+                                <button type="submit" class="btn-analyze" id="btn-reanalyze" style="padding: 0.8rem 1.8rem;">
+                                    <i class="fas fa-rotate"></i> Re-Analyze My Resume
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="reanalyze-output-box" style="display: none; margin-top: 1.5rem;"></div>
+                    </div>
+                {% endif %}
+            </section>
+
             <!-- TAB 1: ATS SCORE DASHBOARD & HEATMAP -->
-            <section class="tab-panel active" id="tab-ats">
+            <section class="tab-panel" id="tab-ats">
+
                 <div class="dashboard-grid">
                     <div class="score-card-main">
                         <h2 style="font-size: 1.4rem;">ATS Optimization Score</h2>
