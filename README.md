@@ -161,11 +161,6 @@ curl -X POST http://127.0.0.1:5000/api/interview-prep \
 
 ---
 
-## 🖼️ Screenshots
-
-> _Add screenshots or a short GIF of the upload flow and results dashboard here for maximum impact on your GitHub profile._
-
----
 
 ## 🗺️ Roadmap
 
