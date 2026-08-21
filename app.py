@@ -75,9 +75,14 @@ def forbidden_error(e):
 
 @app.errorhandler(404)
 def not_found_error(e):
-    if request.path.startswith('/api/'):
-        return jsonify({"error": "Not Found", "message": "API endpoint does not exist."}), 404
-    return render_template('docs.html'), 404
+    path = request.path.lower()
+    # Check if request is strictly for an API route
+    if path.startswith('/api/') and not ('index' in path or path == '/api/' or path == '/api'):
+        return jsonify({"error": "Not Found", "message": f"API endpoint '{request.path}' does not exist."}), 404
+    try:
+        return render_template('index.html', analysis=None, error=None), 200
+    except Exception:
+        return jsonify({"error": "Not Found", "message": "Page not found."}), 404
 
 @app.errorhandler(500)
 def internal_server_error(e):
