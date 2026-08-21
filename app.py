@@ -1,5 +1,5 @@
 import os
-from flask import Flask, send_from_directory, jsonify, render_template
+from flask import Flask, send_from_directory, jsonify, render_template, request
 from flask_login import LoginManager
 
 from models.user_model import User
@@ -14,17 +14,22 @@ app = Flask(__name__)
 
 # Security & Session Configuration
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'ai-resume-analyzer-production-secret-key-2026')
-app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
+
+# Vercel Read-Only File System Handling
+IS_VERCEL = bool(os.environ.get('VERCEL') or os.environ.get('AWS_LAMBDA_FUNCTION_NAME'))
+app.config['UPLOAD_FOLDER'] = '/tmp/uploads' if IS_VERCEL else os.path.join(os.path.dirname(__file__), 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
 
 # Secure Cookies
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = os.environ.get('FLASK_ENV') == 'production'
+app.config['SESSION_COOKIE_SECURE'] = IS_VERCEL or os.environ.get('FLASK_ENV') == 'production'
 
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-os.makedirs(os.path.join(os.path.dirname(__file__), 'docs/flow-diagram'), exist_ok=True)
-os.makedirs(os.path.join(os.path.dirname(__file__), 'docs/architecture'), exist_ok=True)
+# Safe directory creation
+try:
+    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+except Exception:
+    pass
 
 # Initialize Flask Extensions
 init_mail(app)
@@ -47,11 +52,13 @@ app.register_blueprint(api_bp)
 # Static Diagram Serving Routes
 @app.route('/docs/flow-diagram/<path:filename>')
 def serve_flow_diagram(filename):
-    return send_from_directory(os.path.join(app.root_path, 'docs', 'flow-diagram'), filename)
+    diagram_dir = os.path.join(app.root_path, 'docs', 'flow-diagram')
+    return send_from_directory(diagram_dir, filename)
 
 @app.route('/docs/architecture/<path:filename>')
 def serve_architecture_diagram(filename):
-    return send_from_directory(os.path.join(app.root_path, 'docs', 'architecture'), filename)
+    diagram_dir = os.path.join(app.root_path, 'docs', 'architecture')
+    return send_from_directory(diagram_dir, filename)
 
 # Production Error Handlers
 @app.errorhandler(400)

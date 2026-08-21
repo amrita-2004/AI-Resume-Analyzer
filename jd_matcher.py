@@ -1,12 +1,7 @@
 import re
+import math
+from collections import Counter
 from analyzer import SKILLS_DB
-
-try:
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    from sklearn.metrics.pairwise import cosine_similarity
-    HAS_SKLEARN = True
-except ImportError:
-    HAS_SKLEARN = False
 
 def extract_keywords_from_text(text):
     """Extracts known tech skills and key industry terms from text."""
@@ -21,6 +16,28 @@ def extract_keywords_from_text(text):
                 
     return list(set(extracted_skills)), words
 
+def compute_pure_tfidf_similarity(text1, text2):
+    """Pure Python TF-IDF Cosine Similarity engine (lightweight & fast for Vercel)."""
+    words1 = re.findall(r'\b[a-z0-9\.\+#]+\b', text1.lower())
+    words2 = re.findall(r'\b[a-z0-9\.\+#]+\b', text2.lower())
+    
+    if not words1 or not words2:
+        return 0
+        
+    vec1 = Counter(words1)
+    vec2 = Counter(words2)
+    
+    intersection = set(vec1.keys()) & set(vec2.keys())
+    numerator = sum([vec1[x] * vec2[x] for x in intersection])
+    
+    sum1 = sum([vec1[x]**2 for x in vec1.keys()])
+    sum2 = sum([vec2[x]**2 for x in vec2.keys()])
+    denominator = math.sqrt(sum1) * math.sqrt(sum2)
+    
+    if not denominator:
+        return 0
+    return int((float(numerator) / denominator) * 100 * 2.2)
+
 def calculate_jd_match(resume_text, jd_text):
     """Calculates TF-IDF similarity and keyword overlap between Resume & Job Description."""
     if not jd_text or not jd_text.strip():
@@ -33,23 +50,9 @@ def calculate_jd_match(resume_text, jd_text):
     resume_skills, resume_words = extract_keywords_from_text(resume_lower)
     jd_skills, jd_words = extract_keywords_from_text(jd_lower)
     
-    # 1. Similarity Calculation
-    similarity_score = 0
-    if HAS_SKLEARN:
-        try:
-            vectorizer = TfidfVectorizer(stop_words='english')
-            tfidf_matrix = vectorizer.fit_transform([resume_lower, jd_lower])
-            sim = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
-            similarity_score = int(sim * 100)
-        except Exception:
-            similarity_score = 0
-            
-    if not HAS_SKLEARN or similarity_score == 0:
-        # Fallback word overlap ratio
-        overlap = len(resume_words.intersection(jd_words))
-        denom = max(len(jd_words), 1)
-        similarity_score = min(int((overlap / denom) * 100 * 2.5), 95)
-        
+    # 1. Similarity Calculation using pure Python TF-IDF engine
+    similarity_score = min(max(compute_pure_tfidf_similarity(resume_lower, jd_lower), 10), 95)
+    
     # 2. Skill Gap & Keyword Analysis
     resume_skills_set = set([s.lower() for s in resume_skills])
     jd_skills_set = set([s.lower() for s in jd_skills])

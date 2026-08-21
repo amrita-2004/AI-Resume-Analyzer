@@ -1,0 +1,4 @@
+from app import app
+
+# Export app for Vercel Serverless Function entry point
+app = app

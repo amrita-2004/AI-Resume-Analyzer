@@ -3,43 +3,47 @@ import json
 import time
 from datetime import datetime
 
+IS_VERCEL = bool(os.environ.get('VERCEL') or os.environ.get('AWS_LAMBDA_FUNCTION_NAME'))
+
 # Try PyMongo connection
 try:
     from pymongo import MongoClient
     MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/ai_resume_analyzer")
-    mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=2000)
-    # Ping database to check connection
+    mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=1500)
     mongo_client.admin.command('ping')
     db = mongo_client.get_database()
     HAS_MONGODB = True
     print("[Database] Connected successfully to MongoDB.")
 except Exception as e:
     HAS_MONGODB = False
-    print(f"[Database] MongoDB connection unavailable ({e}). Using persistent JSON memory storage.")
+    print(f"[Database] MongoDB connection unavailable ({e}). Using memory storage.")
 
 # Fallback Memory/JSON Storage Engine
 class LocalDocumentStore:
     def __init__(self, filename="storage.json"):
-        self.filename = os.path.join(os.path.dirname(os.path.dirname(__file__)), filename)
+        if IS_VERCEL:
+            self.filename = os.path.join("/tmp", filename)
+        else:
+            self.filename = os.path.join(os.path.dirname(os.path.dirname(__file__)), filename)
         self.data = {"users": {}, "analyses": []}
         self._load()
 
     def _load(self):
-        if os.path.exists(self.filename):
-            try:
+        try:
+            if os.path.exists(self.filename):
                 with open(self.filename, 'r', encoding='utf-8') as f:
                     self.data = json.load(f)
-            except Exception:
-                pass
+        except Exception as e:
+            print(f"[Storage] Could not load local storage: {e}")
 
     def _save(self):
         try:
             with open(self.filename, 'w', encoding='utf-8') as f:
                 json.dump(self.data, f, indent=2, default=str)
         except Exception as e:
-            print(f"[Storage] Error saving local DB: {e}")
+            # On read-only filesystems, proceed without crashing
+            print(f"[Storage Warning] Read-only storage notice: {e}")
 
-    # User operations
     def find_user_by_email(self, email):
         return self.data["users"].get(email.lower())
 
@@ -56,10 +60,8 @@ class LocalDocumentStore:
             self._save()
         return user_dict
 
-    # Analysis history operations
     def save_analysis(self, analysis_dict):
         self.data["analyses"].insert(0, analysis_dict)
-        # Keep latest 100 entries
         self.data["analyses"] = self.data["analyses"][:100]
         self._save()
         return analysis_dict
