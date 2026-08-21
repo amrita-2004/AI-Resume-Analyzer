@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}2FA Verification - AI Career Intelligence{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card glass-card">
+        <div class="auth-header">
+            <div class="auth-icon-circle 2fa-glow">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h2>Two-Factor Authentication</h2>
+            <p>Verification code sent to <strong>{{ email }}</strong></p>
+        </div>
+
+        {% if otp_preview %}
+        <div class="dev-otp-banner">
+            <i class="fa-solid fa-bug"></i>
+            <span><strong>Development Mode OTP:</strong> <code id="otpCodeDisplay">{{ otp_preview }}</code></span>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('auth.verify_2fa_page') }}" class="auth-form">
+            <div class="form-group">
+                <label for="otp_code"><i class="fa-solid fa-key-skeleton"></i> Enter 6-Digit Code (Email or PyOTP App)</label>
+                <input type="text" id="otp_code" name="otp_code" placeholder="123456" maxlength="6" pattern="[0-9]{6}" required autofocus class="input-otp">
+            </div>
+
+            <button type="submit" class="btn-auth-submit btn-primary-gradient">
+                <span>Verify & Continue to Dashboard</span>
+                <i class="fa-solid fa-shield-check"></i>
+            </button>
+        </form>
+
+        <div class="2fa-timer-box">
+            <p>Code expires in: <span id="countdownTimer">05:00</span></p>
+            <button id="btnResendOtp" class="btn-link-resend" onclick="resendOtpCode()">Resend OTP Code</button>
+        </div>
+
+        <div class="auth-footer">
+            <p><a href="{{ url_for('auth.login') }}"><i class="fa-solid fa-arrow-left"></i> Back to Login</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let timeLeft = 300;
+    const timerElement = document.getElementById('countdownTimer');
+    
+    const interval = setInterval(() => {
+        if (timeLeft <= 0) {
+            clearInterval(interval);
+            timerElement.textContent = "Expired";
+            timerElement.classList.add("text-danger");
+        } else {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            timeLeft--;
+        }
+    }, 1000);
+
+    function resendOtpCode() {
+        fetch('/resend-otp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                alert(data.message);
+                if(data.otp_preview) {
+                    const display = document.getElementById('otpCodeDisplay');
+                    if(display) display.textContent = data.otp_preview;
+                }
+                timeLeft = 300;
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+</script>
+{% endblock %}

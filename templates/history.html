@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Analysis History - AI Career Intelligence{% endblock %}
+
+{% block content %}
+<div class="history-wrapper">
+    <div class="dashboard-header">
+        <div>
+            <h1 class="page-title"><i class="fa-solid fa-clock-rotate-left title-icon"></i> Candidate Analysis History</h1>
+            <p class="page-subtitle">Historical ATS scoring evaluations, job matches, and readiness evolution</p>
+        </div>
+    </div>
+
+    <div class="glass-card history-card">
+        {% if records and records|length > 0 %}
+        <div class="table-responsive">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Filename</th>
+                        <th>Target Role</th>
+                        <th>ATS Score</th>
+                        <th>Readiness Score</th>
+                        <th>Status Tier</th>
+                        <th>Missing Skills</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in records %}
+                    <tr>
+                        <td>{{ rec.created_at[:16].replace('T', ' ') }}</td>
+                        <td><i class="fa-solid fa-file-pdf text-rose"></i> {{ rec.filename }}</td>
+                        <td><span class="badge-role">{{ rec.target_role }}</span></td>
+                        <td><strong class="text-teal">{{ rec.ats_score }}/100</strong></td>
+                        <td><strong class="text-amber">{{ rec.readiness_score }}/100</strong></td>
+                        <td>
+                            <span class="tier-badge {{ rec.status_tier.badge_class or 'tier-ready' }}">
+                                {{ rec.status_tier.tier or 'Ready' }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if rec.missing_skills %}
+                                <span class="skills-preview">{{ rec.missing_skills[:3]|join(', ') }}</span>
+                            {% else %}
+                                <span class="text-muted">None</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-folder-open empty-icon"></i>
+            <h3>No Analysis History Found</h3>
+            <p>Upload your first resume to generate real-time telemetries and history logs.</p>
+            <a href="{{ url_for('main.index') }}" class="btn-primary-gradient mt-3">Upload Resume</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

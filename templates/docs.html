@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block title %}System Documentation & Architecture Diagrams{% endblock %}
+
+{% block content %}
+<div class="docs-wrapper">
+    <div class="dashboard-header">
+        <div>
+            <h1 class="page-title"><i class="fa-solid fa-book-open-reader title-icon"></i> System Documentation & Architecture</h1>
+            <p class="page-subtitle">Flow diagram, modern architecture diagram, REST API specs, WebSocket & 2FA workflows</p>
+        </div>
+    </div>
+
+    <!-- Section 1: System Flow Diagram -->
+    <div class="glass-card docs-card mb-4">
+        <div class="docs-card-header">
+            <h2><i class="fa-solid fa-diagram-project text-teal"></i> System Flow Diagram</h2>
+            <div class="diagram-links">
+                <a href="{{ url_for('static', filename='../docs/flow-diagram/flow_diagram.svg') }}" target="_blank" class="btn-sm-outline"><i class="fa-solid fa-download"></i> SVG</a>
+                <a href="{{ url_for('static', filename='../docs/flow-diagram/flow_diagram.png') }}" target="_blank" class="btn-sm-outline"><i class="fa-solid fa-image"></i> PNG</a>
+            </div>
+        </div>
+        <div class="diagram-container">
+            <img src="/docs/flow-diagram/flow_diagram.svg" alt="System Flow Diagram" class="img-diagram">
+        </div>
+        <div class="flow-steps-grid">
+            <div class="flow-step-item"><span>1</span> User Login</div>
+            <div class="flow-step-item"><span>2</span> 2FA Verification</div>
+            <div class="flow-step-item"><span>3</span> Upload Resume</div>
+            <div class="flow-step-item"><span>4</span> Upload Job Description</div>
+            <div class="flow-step-item"><span>5</span> Text Extraction</div>
+            <div class="flow-step-item"><span>6</span> NLP Processing</div>
+            <div class="flow-step-item"><span>7</span> ATS Analysis</div>
+            <div class="flow-step-item"><span>8</span> Job Matching</div>
+            <div class="flow-step-item"><span>9</span> Skill Gap Detection</div>
+            <div class="flow-step-item"><span>10</span> AI Recommendation</div>
+            <div class="flow-step-item"><span>11</span> Job Readiness Score</div>
+            <div class="flow-step-item"><span>12</span> Dashboard</div>
+            <div class="flow-step-item"><span>13</span> Re-analysis</div>
+        </div>
+    </div>
+
+    <!-- Section 2: System Architecture Diagram -->
+    <div class="glass-card docs-card mb-4">
+        <div class="docs-card-header">
+            <h2><i class="fa-solid fa-sitemap text-indigo"></i> System Architecture Diagram</h2>
+            <div class="diagram-links">
+                <a href="{{ url_for('static', filename='../docs/architecture/architecture.svg') }}" target="_blank" class="btn-sm-outline"><i class="fa-solid fa-download"></i> SVG</a>
+                <a href="{{ url_for('static', filename='../docs/architecture/architecture.png') }}" target="_blank" class="btn-sm-outline"><i class="fa-solid fa-image"></i> PNG</a>
+            </div>
+        </div>
+        <div class="diagram-container">
+            <img src="/docs/architecture/architecture.svg" alt="System Architecture Diagram" class="img-diagram">
+        </div>
+    </div>
+
+    <!-- Section 3: REST API Specifications -->
+    <div class="glass-card docs-card mb-4">
+        <h2><i class="fa-solid fa-code text-purple"></i> REST API Documentation</h2>
+        <div class="api-endpoints-list">
+            <div class="api-item">
+                <div class="api-badge post">POST</div>
+                <div class="api-path">/api/analyze</div>
+                <div class="api-desc">Multipart resume upload + optional JD text. Emits SocketIO live progress and returns clean JSON analysis.</div>
+            </div>
+            <div class="api-item">
+                <div class="api-badge post">POST</div>
+                <div class="api-path">/api/job-match</div>
+                <div class="api-desc">Calculates TF-IDF similarity, keyword overlap, missing skills, and priority gap roadmap.</div>
+            </div>
+            <div class="api-item">
+                <div class="api-badge get">GET</div>
+                <div class="api-path">/api/dashboard</div>
+                <div class="api-desc">Retrieves live dashboard cards (ATS score, Job match %, Skill match %, Readiness index, Resume status).</div>
+            </div>
+            <div class="api-item">
+                <div class="api-badge get">GET</div>
+                <div class="api-path">/api/history</div>
+                <div class="api-desc">Retrieves historical resume analysis records from MongoDB or local store.</div>
+            </div>
+            <div class="api-item">
+                <div class="api-badge post">POST</div>
+                <div class="api-path">/api/reanalyze</div>
+                <div class="api-desc">Compares improved resume against baseline analysis to calculate delta scores and resolved gaps.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 4: WebSocket & 2FA Workflows -->
+    <div class="docs-grid-two">
+        <div class="glass-card docs-card">
+            <h2><i class="fa-solid fa-bolt text-amber"></i> WebSocket Real-Time Workflow</h2>
+            <ul class="workflow-list">
+                <li><i class="fa-solid fa-circle-check text-teal"></i> <strong>10%</strong> Resume Uploaded & Magic Byte Validated</li>
+                <li><i class="fa-solid fa-circle-check text-teal"></i> <strong>30%</strong> Text Extracted (PyPDF2 / python-docx)</li>
+                <li><i class="fa-solid fa-circle-check text-teal"></i> <strong>50%</strong> NLP Processing & Skill DB Keyword Search</li>
+                <li><i class="fa-solid fa-circle-check text-teal"></i> <strong>70%</strong> ATS Scoring & TF-IDF Vectorization</li>
+                <li><i class="fa-solid fa-circle-check text-teal"></i> <strong>90%</strong> AI Rejection Vectors & Recovery Roadmap</li>
+                <li><i class="fa-solid fa-circle-check text-teal"></i> <strong>100%</strong> Dashboard Auto-Updated (No Page Refresh)</li>
+            </ul>
+        </div>
+
+        <div class="glass-card docs-card">
+            <h2><i class="fa-solid fa-shield-halved text-rose"></i> 2FA Security Workflow</h2>
+            <ul class="workflow-list">
+                <li><i class="fa-solid fa-lock text-indigo"></i> <strong>Password Hashing:</strong> Werkzeug PBKDF2 Hashing</li>
+                <li><i class="fa-solid fa-envelope text-indigo"></i> <strong>Email OTP:</strong> 6-Digit Code with 5-Minute Expiry</li>
+                <li><i class="fa-solid fa-mobile-screen-button text-indigo"></i> <strong>PyOTP Authenticator:</strong> TOTP QR Code scanning</li>
+                <li><i class="fa-solid fa-shield-exclamation text-indigo"></i> <strong>Lockout Protection:</strong> Throttling after 5 failed attempts</li>
+                <li><i class="fa-solid fa-cookie text-indigo"></i> <strong>Secure Cookies:</strong> HTTPOnly, SameSite Session Cookies</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In - AI Career Intelligence{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card glass-card">
+        <div class="auth-header">
+            <div class="auth-icon-circle">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2>Account Login</h2>
+            <p>Enter your credentials to access your Career Dashboard</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form">
+            <div class="form-group">
+                <label for="email"><i class="fa-solid fa-envelope"></i> Email Address</label>
+                <input type="email" id="email" name="email" value="{{ email or '' }}" placeholder="engineer@example.com" required autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label for="password"><i class="fa-solid fa-key"></i> Password</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn-auth-submit btn-primary-gradient">
+                <span>Continue to 2FA Verification</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Don't have an account? <a href="{{ url_for('auth.register') }}">Create Account</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

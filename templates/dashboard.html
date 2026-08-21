@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+
+{% block title %}Real-Time API Dashboard - AI Career Intelligence{% endblock %}
+
+{% block content %}
+<div class="dashboard-wrapper">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div>
+            <h1 class="page-title"><i class="fa-solid fa-chart-line-up title-icon"></i> Production API Dashboard</h1>
+            <p class="page-subtitle">Live real-time telemetry, ATS metrics, job match alignment, and skill gap visualization</p>
+        </div>
+        <div class="header-actions">
+            <button onclick="refreshDashboardData()" class="btn-secondary-glass">
+                <i class="fa-solid fa-arrows-rotate"></i> Refresh Telemetry
+            </button>
+            <a href="{{ url_for('main.index') }}" class="btn-primary-gradient">
+                <i class="fa-solid fa-plus"></i> New Analysis
+            </a>
+        </div>
+    </div>
+
+    <!-- 7 Dashboard Metrics Cards -->
+    <div class="dashboard-cards-grid">
+        <!-- Card 1: ATS Score -->
+        <div class="glass-card metric-card">
+            <div class="metric-header">
+                <span class="metric-title">ATS Score</span>
+                <i class="fa-solid fa-bullseye card-icon text-teal"></i>
+            </div>
+            <div class="metric-body">
+                <span class="metric-value" id="cardAtsScore">--</span>
+                <span class="metric-denom">/100</span>
+            </div>
+            <div class="metric-footer">
+                <span class="badge-status badge-success" id="badgeAts">Live Evaluation</span>
+            </div>
+        </div>
+
+        <!-- Card 2: Job Match % -->
+        <div class="glass-card metric-card">
+            <div class="metric-header">
+                <span class="metric-title">Job Match %</span>
+                <i class="fa-solid fa-briefcase card-icon text-indigo"></i>
+            </div>
+            <div class="metric-body">
+                <span class="metric-value" id="cardJobMatch">--</span>
+                <span class="metric-denom">%</span>
+            </div>
+            <div class="metric-footer">
+                <span class="subtext">Job Description Alignment</span>
+            </div>
+        </div>
+
+        <!-- Card 3: Skill Match % -->
+        <div class="glass-card metric-card">
+            <div class="metric-header">
+                <span class="metric-title">Skill Match %</span>
+                <i class="fa-solid fa-code card-icon text-purple"></i>
+            </div>
+            <div class="metric-body">
+                <span class="metric-value" id="cardSkillMatch">--</span>
+                <span class="metric-denom">%</span>
+            </div>
+            <div class="metric-footer">
+                <span class="subtext">Tech Stack Overlap</span>
+            </div>
+        </div>
+
+        <!-- Card 4: Experience Match % -->
+        <div class="glass-card metric-card">
+            <div class="metric-header">
+                <span class="metric-title">Experience Match %</span>
+                <i class="fa-solid fa-award card-icon text-blue"></i>
+            </div>
+            <div class="metric-body">
+                <span class="metric-value" id="cardExpMatch">--</span>
+                <span class="metric-denom">%</span>
+            </div>
+            <div class="metric-footer">
+                <span class="subtext">Action Verb & Impact Score</span>
+            </div>
+        </div>
+
+        <!-- Card 5: Job Readiness Score -->
+        <div class="glass-card metric-card highlight-card">
+            <div class="metric-header">
+                <span class="metric-title">Job Readiness Score</span>
+                <i class="fa-solid fa-rocket card-icon text-amber"></i>
+            </div>
+            <div class="metric-body">
+                <span class="metric-value" id="cardReadinessScore">--</span>
+                <span class="metric-denom">/100</span>
+            </div>
+            <div class="metric-footer">
+                <span class="badge-status badge-warning" id="cardTierBadge">Processing</span>
+            </div>
+        </div>
+
+        <!-- Card 6: Missing Skills -->
+        <div class="glass-card metric-card">
+            <div class="metric-header">
+                <span class="metric-title">Missing Skills</span>
+                <i class="fa-solid fa-triangle-exclamation card-icon text-rose"></i>
+            </div>
+            <div class="metric-body">
+                <span class="metric-value" id="cardMissingCount">0</span>
+                <span class="metric-denom">Detected</span>
+            </div>
+            <div class="metric-footer">
+                <span class="subtext" id="cardMissingPreview">None detected</span>
+            </div>
+        </div>
+
+        <!-- Card 7: Resume Status -->
+        <div class="glass-card metric-card">
+            <div class="metric-header">
+                <span class="metric-title">Resume Status</span>
+                <i class="fa-solid fa-shield-circle-check card-icon text-emerald"></i>
+            </div>
+            <div class="metric-body">
+                <span class="metric-text-status" id="cardResumeStatus">No Data</span>
+            </div>
+            <div class="metric-footer">
+                <span class="subtext">Automated ATS State</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Visualizer Section -->
+    <div class="charts-grid-container">
+        <!-- Chart 1: ATS Score Breakdown -->
+        <div class="glass-card chart-card">
+            <div class="chart-header">
+                <h3><i class="fa-solid fa-chart-bar"></i> ATS Score Breakdown</h3>
+            </div>
+            <div class="chart-box">
+                <canvas id="atsScoreChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 2: Skill Match Radar -->
+        <div class="glass-card chart-card">
+            <div class="chart-header">
+                <h3><i class="fa-solid fa-radar"></i> Skill Match Radar</h3>
+            </div>
+            <div class="chart-box">
+                <canvas id="skillMatchChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 3: Job Readiness Distribution -->
+        <div class="glass-card chart-card">
+            <div class="chart-header">
+                <h3><i class="fa-solid fa-pie-chart"></i> Job Readiness Index</h3>
+            </div>
+            <div class="chart-box">
+                <canvas id="jobReadinessChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 4: Missing Skills Priority -->
+        <div class="glass-card chart-card">
+            <div class="chart-header">
+                <h3><i class="fa-solid fa-layer-group"></i> Critical Skill Gaps</h3>
+            </div>
+            <div class="chart-box">
+                <canvas id="missingSkillsChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Re-analysis Before vs After Comparison Chart Section -->
+    <div class="glass-card comparison-chart-card">
+        <div class="chart-header">
+            <h3><i class="fa-solid fa-code-compare"></i> Before vs After Resume Re-Analysis Comparison</h3>
+            <p class="subtext">Tracks metric score gains across resume iterations</p>
+        </div>
+        <div class="chart-box-large">
+            <canvas id="comparisonChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

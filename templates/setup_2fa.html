@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Setup PyOTP 2FA - AI Career Intelligence{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <div class="auth-card glass-card setup-2fa-card">
+        <div class="auth-header">
+            <div class="auth-icon-circle">
+                <i class="fa-solid fa-qrcode"></i>
+            </div>
+            <h2>Setup Authenticator App (PyOTP)</h2>
+            <p>Scan the QR code with Google Authenticator, Authy, or 1Password</p>
+        </div>
+
+        <div class="qr-container">
+            <img src="{{ qr_code }}" alt="2FA QR Code" class="qr-image">
+            <div class="secret-key-box">
+                <span>Secret Key:</span>
+                <code>{{ secret }}</code>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.setup_2fa') }}" class="auth-form">
+            <input type="hidden" name="action" value="enable">
+            
+            <div class="form-group">
+                <label for="code"><i class="fa-solid fa-shield-check"></i> Enter 6-Digit Code from App</label>
+                <input type="text" id="code" name="code" placeholder="123456" maxlength="6" pattern="[0-9]{6}" required class="input-otp">
+            </div>
+
+            <button type="submit" class="btn-auth-submit btn-primary-gradient">
+                <span>Enable 2FA Protection</span>
+                <i class="fa-solid fa-lock"></i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

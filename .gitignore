@@ -4,3 +4,4 @@ venv/
 uploads/
 .env
 .DS_Store
+storage.json
