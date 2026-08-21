@@ -41,6 +41,45 @@
 | 🔌 **REST API** | Headless JSON endpoints for programmatic/async analysis |
 
 ---
+🏗️ Diagram
+                 USER
+                   │
+                   ▼
+        ┌──────────────────┐
+        │    FRONTEND      │
+        │ HTML/CSS/JS      │
+        │ Dashboard        │
+        └────────┬─────────┘
+                 │ REST API
+                 ▼
+        ┌──────────────────┐
+        │   FLASK SERVER   │
+        │   Python Backend │
+        └────────┬─────────┘
+                 │
+       ┌─────────┼─────────┐
+       ▼         ▼         ▼
+   Resume      NLP/AI    Auth + 2FA
+   Parser      Engine
+       │         │
+       └────┬────┘
+            ▼
+    ┌─────────────────┐
+    │ Analysis Engine │
+    │ ATS             │
+    │ Job Matching    │
+    │ Skill Gap       │
+    └────────┬────────┘
+             ▼
+    ┌─────────────────┐
+    │ AI Recommendation│
+    │ Interview Prep  │
+    └────────┬────────┘
+             ▼
+        DATABASE
+             │
+             ▼
+        DASHBOARD
 
 ## 🛠️ Tech Stack
 
